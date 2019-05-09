@@ -148,30 +148,91 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                     key: 'onDataReceived',
                     value: function onDataReceived(dataList) {
                         if (dataList && dataList.length) {
-                            var o = _.groupBy(dataList[0].rows, function (e) {
-                                return e[0];
-                            });
-                            _.forOwn(o, function (e, i) {
-                                var t = _.groupBy(e, function (sta) {
-                                    return sta[1];
-                                });
-                                o[i] = _.forOwn(t, function (sum, tid) {
-                                    t[tid] = sum.map(function (s) {
-                                        return s[2];
-                                    }).reduce(function (x, y) {
-                                        return x + y;
-                                    });
-                                });
-                            });
-
                             var res = [];
-                            _.forOwn(o, function (e, i) {
-                                e.label = i;
-                                res.push(e);
-                            });
-                            this.data = res.sort(function (a, b) {
-                                return a.label > b.label ? -1 : b.label > a.label ? 1 : 0;
-                            });
+                            var attribs = {};
+                            var _iteratorNormalCompletion = true;
+                            var _didIteratorError = false;
+                            var _iteratorError = undefined;
+
+                            try {
+                                for (var _iterator = dataList[0].rows[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                    var r = _step.value;
+
+                                    var e = {};
+                                    e["label"] = r[0];
+                                    var _iteratorNormalCompletion3 = true;
+                                    var _didIteratorError3 = false;
+                                    var _iteratorError3 = undefined;
+
+                                    try {
+                                        for (var _iterator3 = r[1][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                            var a = _step3.value;
+
+                                            e[a[0]] = +a[1];
+                                            attribs[a[0]] = true;
+                                        }
+                                    } catch (err) {
+                                        _didIteratorError3 = true;
+                                        _iteratorError3 = err;
+                                    } finally {
+                                        try {
+                                            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+                                                _iterator3.return();
+                                            }
+                                        } finally {
+                                            if (_didIteratorError3) {
+                                                throw _iteratorError3;
+                                            }
+                                        }
+                                    }
+
+                                    res.push(e);
+                                }
+                            } catch (err) {
+                                _didIteratorError = true;
+                                _iteratorError = err;
+                            } finally {
+                                try {
+                                    if (!_iteratorNormalCompletion && _iterator.return) {
+                                        _iterator.return();
+                                    }
+                                } finally {
+                                    if (_didIteratorError) {
+                                        throw _iteratorError;
+                                    }
+                                }
+                            }
+
+                            var _iteratorNormalCompletion2 = true;
+                            var _didIteratorError2 = false;
+                            var _iteratorError2 = undefined;
+
+                            try {
+                                for (var _iterator2 = res[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+                                    var _r = _step2.value;
+
+                                    for (var _a in attribs) {
+                                        if (!(_a in _r)) {
+                                            _r[_a] = 0;
+                                        }
+                                    }
+                                }
+                            } catch (err) {
+                                _didIteratorError2 = true;
+                                _iteratorError2 = err;
+                            } finally {
+                                try {
+                                    if (!_iteratorNormalCompletion2 && _iterator2.return) {
+                                        _iterator2.return();
+                                    }
+                                } finally {
+                                    if (_didIteratorError2) {
+                                        throw _iteratorError2;
+                                    }
+                                }
+                            }
+
+                            this.data = res;
                         } else {
                             this.data = [{ label: "Machine001", "Off": 15, "Down": 50, "Run": 0, "Idle": 40 }, { label: "Machine002", "Off": 15, "Down": 5, "Run": 40, "Idle": 15 }, { label: "Machine003", "Off": 15, "Down": 30, "Run": 40, "Idle": 15 }, { label: "Machine004", "Off": 15, "Down": 30, "Run": 80, "Idle": 15 }];
                         }
