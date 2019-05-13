@@ -1,7 +1,7 @@
 {
   "type": "panel",
   "name": "Wombat Grouped Bar Chart",
-  "id": "grafana-wombat-groupedbarchart-panel",
+  "id": "banburybill-groupedbarchart-panel",
 
   "info": {
     "description": "Wombat grouped bar chart panel for grafana",

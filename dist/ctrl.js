@@ -78,7 +78,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                 labelSpace: 40,
                 links: [],
                 datasource: null,
-                maxDataPoints: 3,
                 interval: null,
                 targets: [{}],
                 cacheTimeout: null,
@@ -89,8 +88,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                 strokeWidth: 1,
                 fontSize: '80%',
                 fontColor: '#fff',
-                width: 800,
-                height: 400,
                 colorSet: [],
                 colorSch: []
             };
@@ -103,7 +100,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
 
                     var _this = _possibleConstructorReturn(this, (GroupedBarChartCtrl.__proto__ || Object.getPrototypeOf(GroupedBarChartCtrl)).call(this, $scope, $injector));
 
-                    _this.$rootScope = $rootScope;
                     _this.hiddenSeries = {};
                     _this.data = null;
 
@@ -119,8 +115,8 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                 _createClass(GroupedBarChartCtrl, [{
                     key: 'onInitEditMode',
                     value: function onInitEditMode() {
-                        this.addEditorTab('Options', 'public/plugins/grafana-groupedbarchart-panel/partials/editor.html', 2);
-                        this.addEditorTab('Colors', 'public/plugins/grafana-groupedbarchart-panel/partials/colors.html', 3);
+                        this.addEditorTab('Options', 'public/plugins/banburybill-groupedbarchart-panel/partials/editor.html', 2);
+                        this.addEditorTab('Colors', 'public/plugins/banburybill-groupedbarchart-panel/partials/colors.html', 3);
                     }
                 }, {
                     key: 'setUnitFormat',
@@ -252,6 +248,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                 }, {
                     key: 'link',
                     value: function link(scope, elem, attrs, ctrl) {
+                        this.elem = elem;
+                        this.panelContent = elem.find('.panel-content');
+
                         var groupedBarChart = function () {
                             function groupedBarChart(opts) {
                                 var _this3 = this;
@@ -260,8 +259,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
 
                                 this.data = opts.data;
                                 this.margin = opts.margin;
-                                this.width = opts.width;
-                                this.height = opts.height;
+                                this.panel = opts.panel;
                                 this.showLegend = opts.legend;
                                 this.legendType = opts.position;
                                 this.chartType = opts.chartType;
@@ -305,17 +303,22 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                             _createClass(groupedBarChart, [{
                                 key: 'draw',
                                 value: function draw() {
+                                    this.width = this.panel.width();
+                                    this.height = this.panel.height();
+                                    this.graphwidth = this.width / 1.5 - this.margin.left - this.margin.right;
+                                    this.graphheight = this.height / 1.5 - this.margin.top - this.margin.bottom;
                                     d3.select(this.element).html("");
                                     this.svg = d3.select(this.element).append('svg');
                                     this.svg.attr('width', this.width).attr('height', this.height)
-                                    // .attr('viewBox', `0, 0, ${this.width}, ${this.height}`)
-                                    .attr('preserveAspectRatio', 'xMinYMin meet').style('padding', '10px').attr('transform', 'translate(0, ' + this.margin.top + ')');
+                                    //.attr('viewBox', `0, 0, ${this.width}, ${this.height}`)
+                                    //.attr('preserveAspectRatio', 'xMinYMin meet')
+                                    //.style('padding', '10px')
+                                    .attr('transform', 'translate(0, ' + this.margin.top + ')');
 
                                     this.createScales();
                                     this.addAxes();
                                     this.addTooltips();
                                     this.addBar();
-                                    d3.select(this.element).attr('style', 'width: ' + this.width * 1.5 + 'px; height: ' + this.height * 1.5 + 'px');
                                     if (this.showLegend) this.addLegend(this.legendType);
                                 }
                             }, {
@@ -323,19 +326,19 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                 value: function createScales() {
                                     switch (this.orientation) {
                                         case 'horizontal':
-                                            this.y0 = d3.scale.ordinal().rangeRoundBands([+this.height, 0], .2, 0.5);
+                                            this.y0 = d3.scale.ordinal().rangeRoundBands([+this.graphheight, 0], .2, 0.5);
 
                                             this.y1 = d3.scale.ordinal();
 
-                                            this.x = d3.scale.linear().range([0, +this.width]);
+                                            this.x = d3.scale.linear().range([0, +this.graphwidth]);
                                             this.axesConfig = [this.x, this.y0, this.y0, this.y1, this.x];
                                             break;
                                         case 'vertical':
-                                            this.x0 = d3.scale.ordinal().rangeRoundBands([0, +this.width], .2, 0.5);
+                                            this.x0 = d3.scale.ordinal().rangeRoundBands([0, +this.graphwidth], .2, 0.5);
 
                                             this.x1 = d3.scale.ordinal();
 
-                                            this.y = d3.scale.linear().range([0, +this.height]);
+                                            this.y = d3.scale.linear().range([0, +this.graphheight]);
 
                                             this.axesConfig = [this.x0, this.y, this.x0, this.x1, this.y];
                                             break;
@@ -344,8 +347,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                             }, {
                                 key: 'addAxes',
                                 value: function addAxes() {
-                                    var axesScale = 1.1;
-                                    this.xAxis = d3.svg.axis().scale(this.axesConfig[0]).tickSize(-this.height).orient('bottom');
+                                    this.xAxis = d3.svg.axis().scale(this.axesConfig[0]).tickSize(-this.graphheight).orient('bottom');
 
                                     this.yAxis = d3.svg.axis().scale(this.axesConfig[1]).orient('left');
 
@@ -357,16 +359,16 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                     var chartScale = this.chartType === 'bar chart' ? 0 : 1;
                                     var domainCal = this.orientation === 'horizontal' ? [0, d3.max(this.data, function (d) {
                                         return d3.max(d.valores, function (d) {
-                                            return (d.value + chartScale * d.stackVal) * axesScale;
+                                            return d.value + chartScale * d.stackVal;
                                         });
                                     })] : [d3.max(this.data, function (d) {
                                         return d3.max(d.valores, function (d) {
-                                            return (d.value + chartScale * d.stackVal) * axesScale;
+                                            return d.value + chartScale * d.stackVal;
                                         });
                                     }), 0];
                                     this.axesConfig[4].domain(domainCal);
 
-                                    var xAxisConfig = this.svg.append('g').attr('class', 'x axis').attr('transform', 'translate(' + this.margin.left + ', ' + (this.height + this.margin.top) + ')').call(this.xAxis).selectAll('text').style('fill', '' + this.fontColor);
+                                    var xAxisConfig = this.svg.append('g').attr('class', 'x axis').attr('transform', 'translate(' + this.margin.left + ', ' + (this.graphheight + this.margin.top) + ')').call(this.xAxis).selectAll('text').style('fill', '' + this.fontColor);
 
                                     switch (this.labelOrientation) {
                                         case 'horizontal':
@@ -393,7 +395,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                     switch (this.orientation) {
                                         case 'horizontal':
                                             this.avgLineShow && this.options.forEach(function (d) {
-                                                _this4.svg.append('line').attr('x1', _this4.x(_this4.avgList[d])).attr('y1', _this4.height).attr('x2', _this4.x(_this4.avgList[d])).attr('y2', 0).attr('class', d + ' avgLine').attr('transform', 'translate(' + _this4.margin.left + ', ' + _this4.margin.top + ')').style('display', 'none').style('stroke-width', 2).style('stroke', _this4.color(d)).style('stroke-opacity', 0.7);
+                                                _this4.svg.append('line').attr('x1', _this4.x(_this4.avgList[d])).attr('y1', _this4.graphheight).attr('x2', _this4.x(_this4.avgList[d])).attr('y2', 0).attr('class', d + ' avgLine').attr('transform', 'translate(' + _this4.margin.left + ', ' + _this4.margin.top + ')').style('display', 'none').style('stroke-width', 2).style('stroke', _this4.color(d)).style('stroke-opacity', 0.7);
                                             });
 
                                             this.bar = this.svg.selectAll('.bar').data(this.data).enter().append('g').attr('class', 'rect').attr('transform', function (d) {
@@ -419,11 +421,11 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                             break;
                                         case 'vertical':
                                             this.avgLineShow && this.options.forEach(function (d) {
-                                                _this4.svg.append('line').attr('x1', 0).attr('y1', _this4.y(_this4.avgList[d])).attr('x2', +_this4.width).attr('y2', _this4.y(_this4.avgList[d])).attr('class', d + ' avgLine').attr('transform', 'translate(' + _this4.margin.left + ', ' + _this4.margin.top + ')').style('display', 'none').style('stroke-width', 2).style('stroke', _this4.color(d)).style('stroke-opacity', 0.7);
+                                                _this4.svg.append('line').attr('x1', 0).attr('y1', _this4.y(_this4.avgList[d])).attr('x2', +_this4.graphwidth).attr('y2', _this4.y(_this4.avgList[d])).attr('class', d + ' avgLine').attr('transform', 'translate(' + _this4.margin.left + ', ' + _this4.margin.top + ')').style('display', 'none').style('stroke-width', 2).style('stroke', _this4.color(d)).style('stroke-opacity', 0.7);
                                             });
 
                                             this.bar = this.svg.selectAll('.bar').data(this.data).enter().append('g').attr('class', 'rect').attr('transform', function (d, i) {
-                                                return 'translate(' + _this4.x0(d.label) + ', ' + (+_this4.height + _this4.margin.top) + ')';
+                                                return 'translate(' + _this4.x0(d.label) + ', ' + (+_this4.graphheight + _this4.margin.top) + ')';
                                             });
 
                                             this.barC = this.bar.selectAll('rect').data(function (d) {
@@ -435,9 +437,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                             this.barC.append('rect').attr('id', function (d, i) {
                                                 return d.label + '_' + i;
                                             }).attr('height', function (d) {
-                                                return +_this4.height - _this4.y(d.value);
+                                                return +_this4.graphheight - _this4.y(d.value);
                                             }).attr('y', function (d) {
-                                                return _this4.chartType === 'bar chart' ? _this4.y(d.value) - _this4.height : _this4.y(d.value) - 2 * +_this4.height + _this4.y(d.stackVal);
+                                                return _this4.chartType === 'bar chart' ? _this4.y(d.value) - _this4.graphheight : _this4.y(d.value) - 2 * +_this4.graphheight + _this4.y(d.stackVal);
                                             }).attr('x', function (d, i) {
                                                 return _this4.chartType === 'bar chart' ? _this4.x1(d.name) + _this4.margin.left : _this4.x1(d.name) - _this4.x1.rangeBand() * i + _this4.margin.left;
                                             }).attr('value', function (d) {
@@ -452,7 +454,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                     this.chartType === 'bar chart' && this.barC.append('text').attr('x', function (d) {
                                         return _this4.orientation === 'horizontal' ? _this4.x(d.value) + 5 : _this4.x1(d.name) + _this4.x1.rangeBand() / 4 + _this4.margin.left;
                                     }).attr('y', function (d) {
-                                        return _this4.orientation === 'horizontal' ? _this4.y1(d.name) + _this4.y1.rangeBand() / 2 : _this4.y(d.value) - _this4.height - 8;
+                                        return _this4.orientation === 'horizontal' ? _this4.y1(d.name) + _this4.y1.rangeBand() / 2 : _this4.y(d.value) - _this4.graphheight - 8;
                                     }).attr('dy', '.35em').style('fill', '' + this.fontColor).text(function (d) {
                                         return d.value ? d.value : '';
                                     });
@@ -487,23 +489,23 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                                 return 'translate(50,' + (i * 20 + _this5.margin.top) + ')';
                                             });
 
-                                            this.legend.append('rect').attr('x', this.width * 1.1 - 18).attr('width', 18).attr('height', 18).style('fill', this.color);
+                                            this.legend.append('rect').attr('x', this.graphwidth - 18).attr('width', 18).attr('height', 18).style('fill', this.color);
 
-                                            this.legend.append('text').attr('x', this.width * 1.1 - 24).attr('y', 9).attr('dy', '.35em').style('text-anchor', 'end').style('fill', '' + this.fontColor).text(function (d) {
+                                            this.legend.append('text').attr('x', this.graphwidth - 24).attr('y', 9).attr('dy', '.35em').style('text-anchor', 'end').style('fill', '' + this.fontColor).text(function (d) {
                                                 return d;
                                             });
                                             break;
                                         case 'Under graph':
                                             this.legend = this.svg.selectAll('.legend').data(this.options.slice()).enter().append('g').attr('class', 'legend').attr('transform', function (d, i) {
-                                                return 'translate(' + (+i * labelSpace - _this5.width) + ',' + (+_this5.height + 24 + _this5.margin.top) + ')';
+                                                return 'translate(' + (+i * labelSpace - _this5.graphwidth) + ',' + (+_this5.graphheight + 24 + _this5.margin.top) + ')';
                                             });
 
                                             this.legend.append('rect').attr('x', function (d, i) {
-                                                return i * labelSpace + _this5.margin.left + _this5.width * 1 + 0;
+                                                return i * labelSpace + _this5.margin.left + _this5.graphwidth * 1 + 0;
                                             }).attr('width', 18).attr('height', 18).style('fill', this.color);
 
                                             this.legend.append('text').attr('x', function (d, i) {
-                                                return i * labelSpace + _this5.margin.left + _this5.width * 1 + 5;
+                                                return i * labelSpace + _this5.margin.left + _this5.graphwidth * 1 + 5;
                                             }).attr('dx', 18).attr('dy', '1.1em').style('text-anchor', 'start').style('fill', '' + this.fontColor).text(function (d) {
                                                 return d;
                                             });
@@ -527,9 +529,8 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                             var Chart = new groupedBarChart({
                                 data: ctrl.data,
                                 margin: { top: 30, left: 80, bottom: 10, right: 10 },
+                                panel: ctrl.panelContent,
                                 element: '#chart',
-                                width: ctrl.panel.width,
-                                height: ctrl.panel.height,
                                 legend: ctrl.panel.legend.show,
                                 fontColor: ctrl.panel.fontColor,
                                 position: ctrl.panel.legend.position,
