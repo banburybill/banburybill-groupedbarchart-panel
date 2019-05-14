@@ -151,21 +151,45 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                             var _iteratorError = undefined;
 
                             try {
-                                for (var _iterator = dataList[0].rows[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                                    var r = _step.value;
-
-                                    var e = {};
-                                    e["label"] = r[0];
+                                for (var _iterator = dataList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                                    var l = _step.value;
                                     var _iteratorNormalCompletion3 = true;
                                     var _didIteratorError3 = false;
                                     var _iteratorError3 = undefined;
 
                                     try {
-                                        for (var _iterator3 = r[1][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                                            var a = _step3.value;
+                                        for (var _iterator3 = l.rows[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+                                            var r = _step3.value;
 
-                                            e[a[0]] = +a[1];
-                                            attribs[a[0]] = true;
+                                            var e = {};
+                                            e["label"] = r[0];
+                                            var _iteratorNormalCompletion4 = true;
+                                            var _didIteratorError4 = false;
+                                            var _iteratorError4 = undefined;
+
+                                            try {
+                                                for (var _iterator4 = r[1][Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+                                                    var a = _step4.value;
+
+                                                    e[a[0]] = +a[1];
+                                                    attribs[a[0]] = true;
+                                                }
+                                            } catch (err) {
+                                                _didIteratorError4 = true;
+                                                _iteratorError4 = err;
+                                            } finally {
+                                                try {
+                                                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
+                                                        _iterator4.return();
+                                                    }
+                                                } finally {
+                                                    if (_didIteratorError4) {
+                                                        throw _iteratorError4;
+                                                    }
+                                                }
+                                            }
+
+                                            res.push(e);
                                         }
                                     } catch (err) {
                                         _didIteratorError3 = true;
@@ -181,8 +205,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
                                             }
                                         }
                                     }
-
-                                    res.push(e);
                                 }
                             } catch (err) {
                                 _didIteratorError = true;

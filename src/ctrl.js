@@ -70,14 +70,16 @@ export class GroupedBarChartCtrl extends MetricsPanelCtrl {
         if (dataList && dataList.length) {
             let res = [];
             let attribs = {};
-            for ( const r of dataList[0].rows ) {
-                let e = {};
-                e["label"] = r[0];
-                for ( const a of r[1] ) {
-                    e[a[0]] = +a[1];
-                    attribs[a[0]] = true;
+            for ( const l of dataList ) {
+                for ( const r of l.rows ) {
+                    let e = {};
+                    e["label"] = r[0];
+                    for ( const a of r[1] ) {
+                        e[a[0]] = +a[1];
+                        attribs[a[0]] = true;
+                    }
+                    res.push(e);
                 }
-                res.push(e);
             }
             for ( let r of res ) {
                 for ( const a in attribs ) {
